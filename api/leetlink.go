@@ -55,14 +55,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Use the problemID to get the URL from Redis
-	redirectURL, err := client.Get(context.Background(), problemID).Result()
+	redirectSlug, err := client.Get(context.Background(), problemID).Result()
 
 	// Close the Redis client after use
 	closeRedisClient()
 
-	if err != nil || redirectURL == "" {
+	if err != nil || redirectSlug == "" {
 		http.Error(w, "Problem URL not found", http.StatusNotFound)
 		return
 	}
+
+	// Construct the redirect URL
+	redirectURL := "https://leetcode.com/problems/" + redirectSlug + "/description/"
 	http.Redirect(w, r, redirectURL, http.StatusFound)
 }
