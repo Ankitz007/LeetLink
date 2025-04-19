@@ -9,11 +9,9 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var client *redis.Client
-
 // Initiate redis client
-func initRedisClient() {
-	client = redis.NewClient(&redis.Options{
+func initRedisClient() *redis.Client {
+	client := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_ADDRESS"),  // Redis server address
 		Username: os.Getenv("REDIS_USER"),     // Redis username
 		Password: os.Getenv("REDIS_PASSWORD"), // Redis password
@@ -24,10 +22,11 @@ func initRedisClient() {
 		log.Fatalf("Could not connect to Redis: %v", err)
 	}
 	log.Println("Connected to Redis")
+	return client
 }
 
 // Close the Redis client
-func closeRedisClient() {
+func closeRedisClient(client *redis.Client) {
 	if client != nil {
 		if err := client.Close(); err != nil {
 			log.Printf("Error closing Redis client: %v", err)
@@ -38,11 +37,6 @@ func closeRedisClient() {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	// Initialize Redis client
-	if client == nil {
-		initRedisClient()
-	}
-
 	// Log the request details
 	log.Printf("Received request from IP: %s User-Agent: %s", r.RemoteAddr, r.UserAgent())
 
@@ -54,11 +48,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Initialize Redis client
+	client := initRedisClient()
+
 	// Use the problemID to get the URL from Redis
 	redirectSlug, err := client.Get(context.Background(), problemID).Result()
 
 	// Close the Redis client after use
-	closeRedisClient()
+	closeRedisClient(client)
 
 	if err != nil || redirectSlug == "" {
 		http.Error(w, "Problem URL not found", http.StatusNotFound)
