@@ -39,6 +39,18 @@ func Cron(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Total count after: %d, Used memory: %s", totalCount, usedMemory)
 
 	manager.Close()
+
+	response := map[string]string{
+		"status":  "success",
+		"message": "Problems fetched and pushed to Redis successfully",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 
 type RedisManager struct {
