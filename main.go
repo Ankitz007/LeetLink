@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Register the Handler function to the default router
-	http.HandleFunc("/api/", handler.Handler)
+	http.HandleFunc("/api/leetlink/", handler.Handler)
 	http.HandleFunc("/api/cron/", handler.Cron)
 
 	// Start the HTTP server

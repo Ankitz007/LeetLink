@@ -1,10 +1,6 @@
 {
     "routes": [
         {
-            "src": "/api/leetlink",
-            "dest": "/api"
-        },
-        {
             "src": "/api/(.*)",
             "dest": "/api/$1"
         },
